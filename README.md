@@ -67,7 +67,7 @@ networks:
 Certifique-se de ter os seguintes softwares instalados:
 
 - **Docker**: Para criar e gerenciar containers.
-- **Docker Compose**: Para gerenciar os containers definidos no arquivo `docker-compose.yml`.
+- **Docker Compose**: Para gerenciar os containers definidos no arquivo `compose.yaml`.
 
 ---
 
@@ -81,7 +81,7 @@ Crie um arquivo `.env` na raiz do projeto e defina as variáveis:
 POSTGRES_PASSWORD=Pg123
 POSTGRES_USER=kubenews
 POSTGRES_DB=kubenews
-IMAGE_TAG=latest
+IMAGE_TAG=v1
 ```
 
 ### 2. Construir e Iniciar os Containers
