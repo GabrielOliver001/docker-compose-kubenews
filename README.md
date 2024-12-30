@@ -26,9 +26,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}Pg123
-      POSTGRES_USER: ${POSTGRES_USER}kubenews
-      POSTGRES_DB: ${POSTGRES_DB}kubenews
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgre_vol:/var/lib/postgresql/data
     networks:
