@@ -1,36 +1,119 @@
-# Kube-news: Exemplo de Aplicação em NodeJS com Containers
+# Kube-news: Aplicação Exemplo com Docker Compose
 
-O **Kube-news** é uma aplicação de exemplo criada com o objetivo de demonstrar o uso de containers em projetos. A aplicação é desenvolvida em Node.js e utiliza o banco de dados PostgreSQL.
+Este repositório contém a configuração de uma aplicação em **Node.js** que utiliza o **PostgreSQL** como banco de dados, implementada e gerenciada com **Docker Compose**.
+
+---
 
 ## Objetivo
-O projeto é ideal para aprender e testar conceitos de contêineres, como:
-- Configuração de redes entre contêineres.
-- Uso de volumes para persistência de dados.
-- Configuração de variáveis de ambiente para integração entre contêineres.
+
+O objetivo do projeto é demonstrar conceitos essenciais de containers, incluindo:
+
+- Configuração de redes entre containers.
+- Persistência de dados utilizando volumes.
+- Integração de containers com variáveis de ambiente.
+
+---
+
+## Estrutura do Projeto
+
+### `docker-compose.yml`
+Abaixo está a configuração principal do projeto:
+
+```yaml
+services:
+  postgresql:
+    image: postgres:14.15-alpine3.21
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}Pg123
+      POSTGRES_USER: ${POSTGRES_USER}kubenews
+      POSTGRES_DB: ${POSTGRES_DB}kubenews
+    volumes:
+      - postgre_vol:/var/lib/postgresql/data
+    networks:
+      - kubenews_net
+  
+  kube_news:
+    image: gabrieloliver001/kube-news-docker:${IMAGE_TAG:-latest}
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - kubenews_net
+    depends_on:
+      - postgresql
+    environment:
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_HOST: postgresql
+
+volumes:
+  postgre_vol:
+    name: postgre_vol
+
+networks:
+  kubenews_net:
+    driver: bridge
+```
 
 ---
 
 ## Requisitos
 
-- **Docker**: Certifique-se de ter o Docker instalado em sua máquina. 
-- **PostgreSQL**: Não é necessário instalar localmente, pois será executado em um contêiner.
+Certifique-se de ter os seguintes softwares instalados:
+
+- **Docker**: Para criar e gerenciar containers.
+- **Docker Compose**: Para gerenciar os containers definidos no arquivo `docker-compose.yml`.
 
 ---
 
-## Configuração da Aplicação
+## Configurando o Projeto
 
-A aplicação depende de algumas variáveis de ambiente para configurar o acesso ao banco de dados:
+### 1. Variáveis de Ambiente
 
-- **DB_DATABASE**: Nome do banco de dados que será usado.  
-- **DB_USERNAME**: Usuário do banco de dados.  
-- **DB_PASSWORD**: Senha do usuário.  
-- **DB_HOST**: Endereço do banco de dados (nome do contêiner no caso de redes Docker).  
+Crie um arquivo `.env` na raiz do projeto e defina as variáveis:
+
+```env
+POSTGRES_PASSWORD=Pg123
+POSTGRES_USER=kubenews
+POSTGRES_DB=kubenews
+IMAGE_TAG=latest
+```
+
+### 2. Construir e Iniciar os Containers
+
+Use os comandos abaixo para iniciar o projeto:
+
+1. Construa e inicie os containers:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+2. Verifique se os containers estão em execução:
+   ```bash
+   docker-compose ps
+   ```
 
 ---
 
-## Como Configurar
+## Testando a Aplicação
 
-### 1. Criação do Dockerfile da Aplicação
+A aplicação ficará disponível no navegador ou por ferramentas como **Postman** ou **cURL**:
+
+- URL da aplicação:
+  ```
+  http://localhost:8080
+  ```
+
+---
+
+## Estrutura do Dockerfile
+
+O `Dockerfile` utilizado para construir a aplicação está configurado conforme abaixo:
 
 ```dockerfile
 FROM node:22.12.0-alpine3.20
@@ -42,48 +125,18 @@ EXPOSE 8080
 ENTRYPOINT [ "node", "server.js" ]
 ```
 
-### 2. Criar Rede e Volume no Docker
-Crie uma rede para os contêineres se comunicarem e um volume para persistência de dados do PostgreSQL:
-```bash
-docker network create kubenews-net
-docker volume create kubenews-volume
-```
-
-### 3. Subir o Contêiner do Banco de Dados
-Execute o comando abaixo para criar e iniciar o banco de dados PostgreSQL em um contêiner:
-```bash
-docker run -d \
-  -p 5432:5432 \
-  --name kubenews_db \
-  -e POSTGRES_DB=kubenews \
-  -e POSTGRES_USER=kubenews \
-  -e POSTGRES_PASSWORD=Pg1234 \
-  --network kubenews-net \
-  -v kubenews-volume:/var/lib/postgresql/data \
-  postgres:14.15-alpine3.20
-```
-
-### 4. Subir o Contêiner da Aplicação
-Inicie o contêiner da aplicação configurando as variáveis de ambiente necessárias:
-```bash
-docker run -d \
-  -p 8080:8080 \
-  --name kubenews_app \
-  --network kubenews-net \
-  -e DB_DATABASE=kubenews \
-  -e DB_USERNAME=kubenews \
-  -e DB_PASSWORD=Pg1234 \
-  -e DB_HOST=kubenews_db \
-  gabrieloliver001/kube-news-docker:v1
-```
-
 ---
 
-## Testando a Aplicação
+## Limpeza
 
-Acesse a aplicação no navegador ou com ferramentas como **cURL** ou **Postman** em:  
-```
-http://localhost:8080
-```
+Para remover os containers, rede e volumes criados, utilize os comandos:
 
-![image](https://github.com/user-attachments/assets/cd18244e-fa91-4873-b3f5-5967b57e38be)
+1. Parar os containers:
+   ```bash
+   docker-compose down
+   ```
+
+2. Remover os volumes (caso não queira persistência):
+   ```bash
+   docker-compose down -v
+   ```
