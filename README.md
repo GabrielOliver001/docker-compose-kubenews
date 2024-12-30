@@ -16,7 +16,7 @@ O objetivo do projeto é demonstrar conceitos essenciais de containers, incluind
 
 ## Estrutura do Projeto
 
-### `docker-compose.yml`
+### `compose.yaml`
 Abaixo está a configuração principal do projeto:
 
 ```yaml
